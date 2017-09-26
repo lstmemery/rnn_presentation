@@ -64,16 +64,71 @@
                 <pre><code data-trim data-noescape>
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
-						</code></pre>
+				</code></pre>
                 <aside class="notes">This creates a mapping of characters to integers. RNNs take numbers, not characters</aside>
                 <!-- Not sure if this is needed -->
 		        </section>
+                <section>
+                    <h2>Inputs and output</h2>
+                                    <pre><code data-trim data-noescape>
+cs=3
+c1_dat = [idx[i] for i in range(0, len(idx)-1-cs, cs)]
+c2_dat = [idx[i+1] for i in range(0, len(idx)-1-cs, cs)]
+c3_dat = [idx[i+2] for i in range(0, len(idx)-1-cs, cs)]
+c4_dat = [idx[i+3] for i in range(0, len(idx)-1-cs, cs)]
+                        </code></pre>
+                    <p>This creates a list of numbers. We need a matrix. So we create an embedding</p>
+                </section>
 		        <section>
 		            <h2>Embedding</h2>
-		            <p>Add apply latent factors</p>
-		            <div style="float: left;"></div>
-		            <div style="float: right;"></div>
+		            <p><pre>n_fac</pre> is a hyperparameter</p>
+                <pre><code data-trim data-noescape>
+def embedding_input(name, n_in, n_out):
+    inp = Input(shape=(1,), dtype='int64', name=name)
+    emb = Embedding(n_in, n_out, input_length=1)(inp)
+    return inp, Flatten()(emb)
+                </code></pre>
+                <p>Parameters: 3570</p>
+                <aside class="notes">Anyone know why int64 was used?
+                Embedding layer is size (85 [Number of tokens], 42[Number of latent factors]) = 3570 parameters</aside>
 		        </section>
+                <section>
+                    <img src="img/3char_model.png">
+                </section>
+                <section>
+                    <h2>Input to Hidden Layer</h2>
+                    <pre><code data-trim data-noescape>
+n_hidden = 256
+dense_in = Dense(n_hidden, activation='relu')
+c1_hidden = dense_in(c1)
+                    </code></pre>
+                    <p>Parameters: 11008</p>
+                    <aside class="notes">42[latent] * 256[hidden] + 256[biases]</aside>
+                </section>
+                <section>
+                    <h2>Hidden to Hidden Layer</h2>
+                                        <pre><code data-trim data-noescape>
+from keras.layers.merge import add as merge_add
+dense_hidden = Dense(n_hidden, activation='relu')
+c2_dense = dense_in(c2)
+hidden_2 = dense_hidden(c1_hidden)
+c2_hidden = merge_add([c2_dense, hidden_2])  # Element-wise sum
+                    </code></pre>
+                    <p>Parameters: 65792</p>
+                    <aside class="notes">256[previous latent] * 256[new latent] + 256[biases]</aside>
+                </section>
+                <section>
+                    <h2>Hidden to Output Layer</h2>
+                                        <pre><code data-trim data-noescape>
+c3_dense = dense_in(c3)
+hidden_3 = dense_hidden(c2_hidden)
+c3_hidden = merge_add([c3_dense, hidden_3])
+dense_out = Dense(vocab_size, activation='softmax')
+c4_out = dense_out(c3_hidden)
+                    </code></pre>
+                    <p>Parameters: 21845</p>
+                    <aside class="notes">256[previous latent] * 256[output] + 85[biases]</aside>
+                </section>
             </section>
         </div>
     </div>
