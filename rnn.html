@@ -119,7 +119,7 @@ c2_hidden = merge_add([c2_dense, hidden_2])  # Element-wise sum
                 </section>
                 <section>
                     <h2>Hidden to Output Layer</h2>
-                                        <pre><code data-trim data-noescape>
+                                        <pre><code data-trim data-noescape class="python">
 c3_dense = dense_in(c3)
 hidden_3 = dense_hidden(c2_hidden)
 c3_hidden = merge_add([c3_dense, hidden_3])
@@ -127,8 +127,62 @@ dense_out = Dense(vocab_size, activation='softmax')
 c4_out = dense_out(c3_hidden)
                     </code></pre>
                     <p>Parameters: 21845</p>
+                    <!-- TODO: Talk about sparse categorical -->
+                    <!-- TODO: Show results -->
                     <aside class="notes">256[previous latent] * 256[output] + 85[biases]</aside>
                 </section>
+            </section>
+            <section>
+                <section>
+                    <h1>Nth Character Model</h1>
+                </section>
+                <section>
+                    <h2>RNN forms:</h2>
+                    <ol>
+                        <li>Unrolled Form (previous example)</li>
+                        <li>Recurrent Form (next example)</li>
+                    </ol>
+                    <p>Note: Jeremy mentioned that Tensorflow does not have the ability to make recurrent form RNNs. This is no longer true. Use `tf.nn.dynamic_rnn`.</p>
+                    <aside class="notes">CNTK does not support dropout on recurrent form RNNs</aside> 
+                </section>
+                <section>
+                <div style="text-align: left; float: left;">
+                    <img style="height: 40%; width: 40%" src="img/nth_char_model.png">
+                </div>
+                <div style="text-align: right; float: right;">
+                    <pre><code data-trim data-noescape class="python">
+dense_in = Dense(n_hidden, activation='relu')
+dense_hidden = Dense(n_hidden, activation='relu', 
+                     kernel_initializer="identity")
+dense_out = Dense(vocab_size, activation='softmax')
+                    </code></pre>
+                </div>
+                </section>
+
+                <section>
+                    <h2>Combining layers</h2>
+                    <pre><code data-trim data-noescape class="python">
+hidden = dense_in(c_ins[0][1])
+for i in range(1,cs):
+    c_dense = dense_in(c_ins[i][1])
+    hidden = dense_hidden(hidden)
+    hidden = merge_add([c_dense, hidden])
+c_out = dense_out(hidden)
+                    </code></pre>
+                    <p>This is common architecture. So Keras already has a version of it.</p>
+                </section>
+                <section>
+                    <h2>Keras: SimpleRNN</h2>
+                                        <pre><code data-trim data-noescape class="python">
+model=Sequential([
+        Embedding(vocab_size, n_fac, input_length=cs),
+        SimpleRNN(n_hidden, activation='relu', recurrent_initializer='identity'),
+        Dense(vocab_size, activation='softmax')
+    ])
+                    </code></pre>
+                    <p>By setting recurrent_initializer = identity means do nothing by default</p>
+                </section>
+                <!-- Try the Twilight stuff later -->
             </section>
         </div>
     </div>
