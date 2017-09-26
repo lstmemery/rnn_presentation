@@ -1,79 +1,97 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Fast.ai: Lesson 6</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fast.ai: Lesson 6</title>
+    <link rel="stylesheet" href="reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/moon.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="css/solarized-dark.css">
+    <!-- Printing and PDF exports -->
+    <script>
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match(/print-pdf/gi) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
 
-		<link rel="stylesheet" href="reveal.js/css/reveal.css">
-		<link rel="stylesheet" href="reveal.js/css/theme/moon.css">
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>Fast.ai Lesson 6 Review</h1></section>
+            <section>
+                <ol>
+                    <li>Pseudolabeling Revisited</li>
+                    <li>Embeddings Revisited</li>
+                    <li>RNNs</li>
+                    <li>Theano/Tensorflow</li>
+                </ol>
+                <aside class="notes">Table of Contents Here</aside>
+            </section>
+            <section>
+                <h1>Pseudolabeling Revisited</h1>
+            </section>
+            <section>
+                <h1>Embeddings Revisited</h1>
+            </section>
+            <section>
+                <section>
+                    <h1>RNNs</h1>
+                </section>
+                <section>
+                    <h2>Use cases for RNNs</h2>
+                    <ul>
+                        <li>Anything that requires knowledge of long term structure</li>
+                        <li>Text data</li>
+                        <!-- More -->
+                    </ul>
+                </section>
+            </section>
+            <section>
+                <section>
+                    <h1>Three Character Model</h1>
+                </section>
+                <section>
+                    <img src="img/3char_model.png">
+                </section>
+            	<section>
+                <h2>Input</h2>
+                <pre><code data-trim data-noescape>
+char_indices = dict((c, i) for i, c in enumerate(chars))
+indices_char = dict((i, c) for i, c in enumerate(chars))
+						</code></pre>
+                <aside class="notes">This creates a mapping of characters to integers. RNNs take numbers, not characters</aside>
+                <!-- Not sure if this is needed -->
+		        </section>
+		        <section>
+		            <h2>Embedding</h2>
+		            <p>Add apply latent factors</p>
+		            <div style="float: left;"></div>
+		            <div style="float: right;"></div>
+		        </section>
+            </section>
+        </div>
+    </div>
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.js"></script>
+    <script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        dependencies: [
+            { src: 'reveal.js/plugin/markdown/marked.js' },
+            { src: 'reveal.js/plugin/markdown/markdown.js' },
+            { src: 'reveal.js/plugin/notes/notes.js', async: true },
+            { src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+    });
+    </script>
+</body>
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
-
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section><h1>Fast.ai Lesson 6 Review</h1></section>
-				<section>
-					<ol>
-						<li>Pseudolabeling Revisited</li>
-						<li>Embeddings Revisited</li>
-						<li>RNNs</li>
-						<li>Theano/Tensorflow</li>
-					</ol>
-					<aside class="notes">Table of Contents Here</aside>
-				</section>
-				<section>
-					<h1>Pseudolabeling Revisited</h1>
-				</section>
-				<section>
-					<h1>Embeddings Revisited</h1>
-				</section>
-				<section>
-					<section>
-						<h1>RNNs</h1>	
-					</section>
-					<section>
-						<h2>Use cases for RNNs</h2>
-						<ul>
-							<li>Anything that requires knowledge of long term structure</li>
-							<li>Text data</li>
-							<!-- More -->
-						</ul>
-					</section>
-					<section>
-						
-					</section>
-				</section>
-			</div>
-		</div>
-
-		<script src="reveal.js/lib/js/head.min.js"></script>
-		<script src="reveal.js/js/reveal.js"></script>
-
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'reveal.js/plugin/markdown/marked.js' },
-					{ src: 'reveal.js/plugin/markdown/markdown.js' },
-					{ src: 'reveal.js/plugin/notes/notes.js', async: true },
-					{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
 </html>
