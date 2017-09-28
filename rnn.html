@@ -38,6 +38,13 @@
                 <aside class="notes">Table of Contents Here</aside>
             </section>
             <section>
+                    <h2>Some changes to Jeremy's Code</h2>
+                    <p>Migrated from Keras 1 to 2</p>
+                    <p>Migrated from Python 2 to 3</p>
+                    <p>Using a Tensorflow backend (instead of Theano)</p>
+                    <p>Only important difference: Had to remove extra dimensions for some training</p>
+            </section>
+            <section>
                     <h2>Use cases for RNNs</h2>
                     <ul>
                         <li>Anything that requires knowledge of long term structure</li>
@@ -175,18 +182,18 @@ model=Sequential([
                     <p>Parameters of Dense layer: 22102</p>
                     <p>Parameters of SimpleRNN: 76544</p>
                     <aside class="notes">Dense: 256[Input] * 86[Output] = 22102</aside>
-                    <aside class="notes">SimpleRNN: 256[Input] * (256 + 42 +1)??? = 76544</aside>
+                    <aside class="notes">SimpleRNN: 256*256[Hidden] + (42 + 1)[Input] * 256 = 76544</aside>
                 </section>
             </section>
             <section>
                 <section><h1>Sequential RNNs</h1></section>
                 <section>
                     <h2>Previously...</h2>
-                    <img src="img/nth_char_model.png">
+                    <img style="height: 70%; width: 70%" src="img/nth_char_model.png">
                 </section>
                 <section>
                     <h2>Now</h2>
-                    <img src="img/seq_rnn_model.png">
+                    <img style="height: 70%; width: 70%" src="img/seq_rnn_model.png">
                 </section>
                 <section>
                     <p>The output of one step is the input of the next step</p>
@@ -194,7 +201,7 @@ model=Sequential([
 c_in_dat = [[idx[i+n] for i in range(0, len(idx) - 1 - cs, cs)]
             for n in range(cs)]
 c_out_dat = [[idx[i+n] for i in range(1, len(idx) - cs, cs)] 
-            for n in range(cs)]
+            for n in range(cs)] # This changed
                     </code></pre>
                 </section>
                 <section>
@@ -203,6 +210,8 @@ c_out_dat = [[idx[i+n] for i in range(1, len(idx) - cs, cs)]
 inp1 = Input(shape=(n_fac,), name='zeros')
 hidden = dense_in(inp1)
                     </code></pre>
+                    <aside class="notes">We want the input to be used in each loop, but need to initialize
+                        to something.</aside>
                 </section>
                 <section>
                     <pre><code data-trim data-noescape class="python">
@@ -237,47 +246,46 @@ model=Sequential([
                     </ol>
                     <aside class="notes">TimeDistributed is a wrapper that applies a Dense layer to each time step.</aside>
                 </section>
-                <section>
-                    <h2>Some changes to Jeremy's Code</h2>
-                    <p>Migrated from Keras 1 to 2</p>
-                    <p>Migrated from Python 2 to 3</p>
-                    <p>Using a Tensorflow backend (instead of Theano)</p>
-                    <p>Only important difference: Had to remove extra dimensions for some training</p>
-                </section>
+
             </section>
             <section>
                 <section>
                     <h1>Stateful RNNs</h1>
                 </section>
                 <section>
-                <p>We want to model long-term dependencies</p>
-                <p>The RNN needs to be aware of ALL of the previous sequence</p>
-                <p>This was impossible until the creation of Long-Short Term Memory</p>
-                <p>An LSTM replaces the hidden-to-hidden matrix with another neural net</p>
-                <p>LSTMs are difficult to parallelize. Training is slower</p>
+                    <ul>
+                        <li>We want to model long-term dependencies</li>
+                        <li>The RNN needs to be aware of ALL of the previous sequence</li>
+                        <li>This was impossible until the creation of Long-Short Term Memory</li>
+                        <li>An LSTM replaces the hidden-to-hidden matrix with another neural net</li>
+                        <li>LSTMs are difficult to parallelize. Training is slower</li>
+                    </ul>
+                <aside class="notes">LSTM Gates: Forget, Input, Output, sometimes bias?</aside>
                 </section>
                 <section>
                 <h2>First Model</h2>
                     <pre><code data-trim data-noescape class="python">
 model=Sequential([
-        Embedding(vocab_size, n_fac, input_length=cs, batch_input_shape=(bs, 8)),
+        Embedding(vocab_size, n_fac, input_length=cs,
+                  batch_input_shape=(bs, 8)),
         BatchNormalization(),
         LSTM(n_hidden, return_sequences=True, stateful=True),
         TimeDistributed(Dense(vocab_size, activation='softmax')),
     ])
                     </code></pre>
                     <p>Batch Normalization was required to get this model running</p>
-                    <p>Parameters:</p>
-                    <ul>
-                        <li>84[Input] * 42[Latent Factors] = 3612</li>
-                        <li>42[Input] * 2 [Parameters] *2[Dimensions] =168</li>
-                        <li>4 * ((42[Input]+1)*256[Output] + 256**2) = 306176</li>
-                        <li>22102 = 256[Input] * [86]Output</li>
-                    </ul>              
+                    <p>BatchNorm Parameters: 168</p>
+                    <p>LSTM Parameters: 306176</p>
+                    <aside class="notes">
+                        <p>84[Input] * 42[Latent Factors] = 3612</p>
+                        <p>42[Input] * 2 [Parameters] * 2[Dimensions] =168</p>
+                        <p>4 * ((42[Input] + 1)*256[Output] + 256**2) = 306176</p>
+                        <p>22102 = 256[Input] * [86]Output</p>
+                    </aside>
                 </section>
                 <section>
                 <h2>Stacked RNN</h2>
-                <img src="stacked_model.png">
+                <img style="height: 70%; width: 70%" src="img/stacked_model.png">
                 </section>
                 <section>
             <pre><code data-trim data-noescape class="python">
@@ -303,27 +311,36 @@ model=Sequential([
                 <p>We to make this explicit for Theano</p>
                     <pre><code data-trim data-noescape class="python">
 model=Sequential([
-        SimpleRNN(n_hidden, return_sequences=True, input_shape=(cs, vocab_size),
-                  activation='relu', recurrent_initializer="identity"),
+        SimpleRNN(n_hidden, return_sequences=True,
+                  input_shape=(cs, vocab_size),
+                  activation='relu',
+                  recurrent_initializer="identity"),
         TimeDistributed(Dense(vocab_size, activation='softmax')),
     ])
 model.compile(loss='categorical_crossentropy', optimizer=Adam())
                     </code></pre>
+                    <aside class="notes">Not strictly true, we don't use the Adam Optimizer</aside>
+                </section>
+                <section>
+                    <img src="img/seq_rnn_model.png">
                 </section>
                 <section>
                     <h2>Theano</h2>
-                    <p>Manipulates tensors in the GPU</p>
-                    <p>Automatic Differentiation</p>
-                    <p>Need to declare upfront for computational graph</p>
-                    <p>Used shared to claim an array for theano</p>
-                    <p>Breaks CUDA when you try upgrade it the day before a presentation</p>
+                    <ul>
+                        <li>Manipulates tensors in the GPU</li>
+                        <li>Automatic Differentiation</li>
+                        <li>Need to declare upfront for computational graph</li>
+                        <li>Used shared to claim an array for theano</li>
+                        <li>Breaks CUDA when you try upgrade it the day before a presentation</li>
+                    </ul>
                 </section>
                 <section>
                     <h2>Initialization</h2>
                                         <pre><code data-trim data-noescape class="python">
 def init_wgts(rows, cols):
     scale = math.sqrt(2 / rows)
-    return shared(normal(scale=scale, size=(rows, cols)).astype(np.float32))
+    return shared(normal(scale=scale,
+                         size=(rows, cols)).astype(np.float32))
 def init_bias(rows):
     return shared(np.zeros(rows, dtype=np.float32))
                     </code></pre>
@@ -334,7 +351,8 @@ def init_bias(rows):
                                         <pre><code data-trim data-noescape class="python">
 def init_wgts(rows, cols):
     scale = math.sqrt(2 / rows)
-    return shared(normal(scale=scale, size=(rows, cols)).astype(np.float32))
+    return shared(normal(scale=scale,
+                         size=(rows, cols)).astype(np.float32))
 
 def init_bias(rows):
     return shared(np.zeros(rows, dtype=np.float32))
@@ -348,17 +366,7 @@ def id_and_bias(n):
                     <aside class="notes">init_wgts is using Glorot initialization</aside>
                 </section>
                 <section>
-                    <pre><code data-trim data-noescape class="python">
-t_inp = T.matrix('inp')
-t_outp = T.matrix('outp')
-t_h0 = T.vector('h0')
-lr = T.scalar('lr')
-
-all_args = [t_h0, t_inp, t_outp, lr]
-                    </code></pre>
-                    <aside class="notes">Announcing to Theano</aside>
-                </section>
-                <section>
+                    <h2>Announcing to Theano</h2>
                     <pre><code data-trim data-noescape class="python">
 t_inp = T.matrix('inp', dtype="float32")
 t_outp = T.matrix('outp', dtype="float32")
@@ -366,16 +374,13 @@ t_h0 = T.vector('h0', dtype="float32")
 lr = T.scalar('lr', dtype="float32")
 
 all_args = [t_h0, t_inp, t_outp, lr]
-                    </code></pre>
-                    <aside class="notes">Announcing to Theano. Had to include dtype to stop errors.</aside>
-                </section>
-                <section>
-                    <pre><code data-trim data-noescape class="python">
-W_h = id_and_bias(n_hidden)            # Hidden-to-hidden
-W_x = wgts_and_bias(n_input, n_hidden) # Input-to-hidden
+
+W_h = id_and_bias(n_hidden)             # Hidden-to-hidden
+W_x = wgts_and_bias(n_input, n_hidden)  # Input-to-hidden
 W_y = wgts_and_bias(n_hidden, n_output) # Hidden-to-output
 w_all = list(chain.from_iterable([W_h, W_x, W_y]))
                     </code></pre>
+                    <aside class="notes">Announcing to Theano. Had to include dtype to stop errors.</aside>
                 </section>
                 <section>
                     <h2>Scanning</h2>
@@ -389,7 +394,8 @@ def step(x, h, W_h, b_h, W_x, b_x, W_y, b_y):
     return h, T.flatten(y, 1)
 
 [v_h, v_y], _ = theano.scan(step, sequences=t_inp,
-                            outputs_info=[t_h0, None], non_sequences=w_all)
+                            outputs_info=[t_h0, None],
+                            non_sequences=w_all)
                     </code></pre>
                     <aside class="notes">I believe the None represents no prior info about output</aside>
                 </section>
@@ -400,11 +406,14 @@ error = nnet.categorical_crossentropy(v_y, t_outp).sum()
 g_all = T.grad(error, w_all)
 
 def upd_dict(wgts, grads, lr):
-    return OrderedDict({w: w - g * lr for (w, g) in zip(wgts, grads)}) # This is gradient descent!
+    return OrderedDict({w: w - g * lr for (w, g)
+                        in zip(wgts, grads)})
+                        # This is gradient descent!
 
 upd = upd_dict(w_all, g_all, lr)
 
-fn = theano.function(all_args, error, updates=upd, allow_input_downcast=True)
+fn = theano.function(all_args, error, updates=upd,
+                     allow_input_downcast=True)
                     </code></pre>
                     <aside class="notes">All of the gradient work happens here!</aside>
                 </section>
@@ -423,7 +432,8 @@ for i in range(len(X)):
                 <section>
                     <h2>Answers</h2>
                     <pre><code data-trim data-noescape class="python">
-f_y = theano.function([t_h0, t_inp], v_y, allow_input_downcast=True)
+f_y = theano.function([t_h0, t_inp], v_y,
+                      allow_input_downcast=True)
 
 pred = np.argmax(f_y(np.zeros(n_hidden), X[6]), axis=1)
 act = np.argmax(X[6], axis=1)
@@ -435,7 +445,7 @@ act = np.argmax(X[6], axis=1)
                 </section>
 
             </section>
-
+            <section><h1>Questions?</h1></section>
         </div>
     </div>
     <script src="reveal.js/lib/js/head.min.js"></script>
