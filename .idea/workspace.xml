@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/rnn.html" line="177" mnemonic="0" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="43562775-3221-4360-9abc-0b6d450b0533" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
@@ -27,9 +30,11 @@
       <file leaf-file-name="rnn.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/rnn.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="438" column="61" lean-forward="false" selection-start-line="438" selection-start-column="61" selection-end-line="438" selection-end-column="61" />
-              <folding />
+            <state relative-caret-position="222">
+              <caret line="141" column="57" lean-forward="false" selection-start-line="141" selection-start-column="24" selection-end-line="141" selection-end-column="57" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#section#2;n#section#4;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -71,6 +76,12 @@
         <option value="Python Script" />
       </list>
     </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>sequential</find>
+      <find>stateful</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -175,7 +186,14 @@
       <option name="project" value="LOCAL" />
       <updated>1506632071896</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Theano RNN done">
+      <created>1506637404000</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1506637404000</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -212,7 +230,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
     <MESSAGE value="Nearly complete. Most formatting" />
-    <option name="LAST_COMMIT_MESSAGE" value="Nearly complete. Most formatting" />
+    <MESSAGE value="Theano RNN done" />
+    <option name="LAST_COMMIT_MESSAGE" value="Theano RNN done" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -249,7 +268,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6372">
           <caret line="354" column="25" lean-forward="true" selection-start-line="354" selection-start-column="25" selection-end-line="354" selection-end-column="25" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#section#2;n#section#4;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -265,7 +286,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#section#2;n#section#4;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -312,9 +335,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/rnn.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="438" column="61" lean-forward="false" selection-start-line="438" selection-start-column="61" selection-end-line="438" selection-end-column="61" />
-          <folding />
+        <state relative-caret-position="222">
+          <caret line="141" column="57" lean-forward="false" selection-start-line="141" selection-start-column="24" selection-end-line="141" selection-end-column="57" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#section#2;n#section#4;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

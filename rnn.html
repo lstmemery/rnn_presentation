@@ -32,23 +32,19 @@
                     <li>Three Character Model</li>
                     <li>Nth Character Model</li>
                     <li>Sequential RNNs</li>
-                    <li></li>
+                    <li>Stateful RNNs</li>
+                    <li>RNN in Theano</li>
                 </ol>
                 <aside class="notes">Table of Contents Here</aside>
             </section>
             <section>
-                <section>
-                    <h1>RNNs</h1>
-                </section>
-                <section>
                     <h2>Use cases for RNNs</h2>
                     <ul>
                         <li>Anything that requires knowledge of long term structure</li>
                         <li>Text data</li>
 						<li>Sequential data</li>
-                        <!-- More -->
+                        <li>Time series</li>
                     </ul>
-                </section>
             </section>
             <section>
                 <section>
@@ -58,13 +54,12 @@
                     <img src="img/3char_model.png">
                 </section>
             	<section>
-                <h2>Input</h2>
+                <h2>Mapping characters to integers</h2>
                 <pre><code data-trim data-noescape class="python">
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 				</code></pre>
                 <aside class="notes">This creates a mapping of characters to integers. RNNs take numbers, not characters</aside>
-                <!-- Not sure if this is needed -->
 		        </section>
                 <section>
                     <h2>Inputs and output</h2>
@@ -75,11 +70,12 @@ c2_dat = [idx[i+1] for i in range(0, len(idx)-1-cs, cs)]
 c3_dat = [idx[i+2] for i in range(0, len(idx)-1-cs, cs)]
 c4_dat = [idx[i+3] for i in range(0, len(idx)-1-cs, cs)]
                         </code></pre>
-                    <p>This creates a list of numbers. We need a matrix. So we create an embedding</p>
+                    <p>This creates a list of numbers.</p>
+                    <p>We need a matrix. So we create an embedding</p>
                 </section>
 		        <section>
 		            <h2>Embedding</h2>
-		            <p><pre>n_fac</pre> is a hyperparameter</p>
+		            <p>n_fac is a hyperparameter</p>
                 <pre><code data-trim data-noescape class="python">
 def embedding_input(name, n_in, n_out):
     inp = Input(shape=(1,), dtype='int64', name=name)
@@ -88,7 +84,7 @@ def embedding_input(name, n_in, n_out):
                 </code></pre>
                 <p>Parameters: 3570</p>
                 <aside class="notes">Anyone know why int64 was used?
-                Embedding layer is size (85 [Number of tokens], 42[Number of latent factors]) = 3570 parameters</aside>
+                Embedding layer is size (85 [Number of tokens] * 42[Number of latent factors]) = 3570 parameters</aside>
 		        </section>
                 <section>
                     <img src="img/3char_model.png">
@@ -125,8 +121,7 @@ dense_out = Dense(vocab_size, activation='softmax')
 c4_out = dense_out(c3_hidden)
                     </code></pre>
                     <p>Parameters: 21845</p>
-                    <!-- TODO: Show results -->
-                    <aside class="notes">256[previous latent] * 86[output]</aside>
+                    <aside class="notes">256[previous latent] * 85[output] + 85[biases]</aside>
                 </section>
             </section>
             <section>
@@ -139,21 +134,19 @@ c4_out = dense_out(c3_hidden)
                         <li>Unrolled Form (previous example)</li>
                         <li>Recurrent Form (next example)</li>
                     </ol>
-                    <p>Note: Jeremy mentioned that Tensorflow does not have the ability to make recurrent form RNNs. This is no longer true. Use `tf.nn.dynamic_rnn`.</p>
+                    <p>Note: Jeremy mentioned that Tensorflow does not have the ability to make recurrent form RNNs.</p>
+                    <p>This is no longer true. Use `tf.nn.dynamic_rnn`.</p>
                     <aside class="notes">CNTK does not support dropout on recurrent form RNNs</aside> 
                 </section>
                 <section>
-                <div style="text-align: left; float: left;">
                     <img style="height: 40%; width: 40%" src="img/nth_char_model.png">
-                </div>
-                <div style="text-align: right; float: right;">
                     <pre><code data-trim data-noescape class="python">
 dense_in = Dense(n_hidden, activation='relu')
 dense_hidden = Dense(n_hidden, activation='relu', 
                      kernel_initializer="identity")
 dense_out = Dense(vocab_size, activation='softmax')
                     </code></pre>
-                </div>
+
                 </section>
 
                 <section>
@@ -173,15 +166,17 @@ c_out = dense_out(hidden)
                                         <pre><code data-trim data-noescape class="python">
 model=Sequential([
         Embedding(vocab_size, n_fac, input_length=cs),
-        SimpleRNN(n_hidden, activation='relu', recurrent_initializer='identity'),
+        SimpleRNN(n_hidden, activation='relu',
+                  recurrent_initializer='identity'),
         Dense(vocab_size, activation='softmax')
     ])
                     </code></pre>
                     <p>By setting recurrent_initializer = identity means do nothing by default</p>
                     <p>Parameters of Dense layer: 22102</p>
-                    <aside class="notes">256[Input] * 86[Output] = 22102</aside>
+                    <p>Parameters of SimpleRNN: 76544</p>
+                    <aside class="notes">Dense: 256[Input] * 86[Output] = 22102</aside>
+                    <aside class="notes">SimpleRNN: 256[Input] * (256 + 42 +1)??? = 76544</aside>
                 </section>
-                <!-- Try the Twilight stuff later -->
             </section>
             <section>
                 <section><h1>Sequential RNNs</h1></section>
