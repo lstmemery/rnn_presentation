@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fast.ai: Lesson 6</title>
+    <title>Fast.AI: Lesson 6</title>
     <link rel="stylesheet" href="reveal.js/css/reveal.css">
     <link rel="stylesheet" href="reveal.js/css/theme/moon.css">
     <!-- Theme used for syntax highlighting of code -->
@@ -23,7 +23,9 @@
     <div class="reveal">
         <div class="slides">
             <section>
-                <h1>Fast.ai Lesson 6 Review</h1></section>
+                <h1>Fast.ai Lesson 6 Review</h1>
+                <p>Matthew Emery [<a href="https://github.com/lstmemery/">@lstmemery</a>]</p>
+                </section>
             <section>
                 <ol>
                     <li>Pseudolabeling Revisited</li>
@@ -61,7 +63,7 @@
                 </section>
             	<section>
                 <h2>Input</h2>
-                <pre><code data-trim data-noescape>
+                <pre><code data-trim data-noescape class="python">
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 				</code></pre>
@@ -70,7 +72,7 @@ indices_char = dict((i, c) for i, c in enumerate(chars))
 		        </section>
                 <section>
                     <h2>Inputs and output</h2>
-                                    <pre><code data-trim data-noescape>
+                                    <pre><code data-trim data-noescape class="python">
 cs=3
 c1_dat = [idx[i] for i in range(0, len(idx)-1-cs, cs)]
 c2_dat = [idx[i+1] for i in range(0, len(idx)-1-cs, cs)]
@@ -82,7 +84,7 @@ c4_dat = [idx[i+3] for i in range(0, len(idx)-1-cs, cs)]
 		        <section>
 		            <h2>Embedding</h2>
 		            <p><pre>n_fac</pre> is a hyperparameter</p>
-                <pre><code data-trim data-noescape>
+                <pre><code data-trim data-noescape class="python">
 def embedding_input(name, n_in, n_out):
     inp = Input(shape=(1,), dtype='int64', name=name)
     emb = Embedding(n_in, n_out, input_length=1)(inp)
@@ -97,7 +99,7 @@ def embedding_input(name, n_in, n_out):
                 </section>
                 <section>
                     <h2>Input to Hidden Layer</h2>
-                    <pre><code data-trim data-noescape>
+                    <pre><code data-trim data-noescape class="python">
 n_hidden = 256
 dense_in = Dense(n_hidden, activation='relu')
 c1_hidden = dense_in(c1)
@@ -107,7 +109,7 @@ c1_hidden = dense_in(c1)
                 </section>
                 <section>
                     <h2>Hidden to Hidden Layer</h2>
-                                        <pre><code data-trim data-noescape>
+                                        <pre><code data-trim data-noescape class="python">
 from keras.layers.merge import add as merge_add
 dense_hidden = Dense(n_hidden, activation='relu')
 c2_dense = dense_in(c2)
@@ -181,9 +183,150 @@ model=Sequential([
     ])
                     </code></pre>
                     <p>By setting recurrent_initializer = identity means do nothing by default</p>
+                    <p>Parameters of Dense layer: 22102</p>
+                    <aside class="notes">256[Input] * 86[Output] = 22102</aside>
                 </section>
                 <!-- Try the Twilight stuff later -->
             </section>
+            <section>
+                <section><h1>Sequential RNNs</h1></section>
+                <section>
+                    <h2>Previously...</h2>
+                    <img src="img/nth_char_model.png">
+                </section>
+                <section>
+                    <h2>Now</h2>
+                    <img src="img/seq_rnn_model.png">
+                </section>
+                <section>
+                    <p>The output of one step is the input of the next step</p>
+                    <pre><code data-trim data-noescape class="python">
+c_in_dat = [[idx[i+n] for i in range(0, len(idx) - 1 - cs, cs)]
+            for n in range(cs)]
+c_out_dat = [[idx[i+n] for i in range(1, len(idx) - cs, cs)] 
+            for n in range(cs)]
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>The input also changes</h2>
+                    <pre><code data-trim data-noescape class="python">
+inp1 = Input(shape=(n_fac,), name='zeros')
+hidden = dense_in(inp1)
+                    </code></pre>
+                </section>
+                <section>
+                    <pre><code data-trim data-noescape class="python">
+outs = []
+
+for i in range(cs):
+    c_dense = dense_in(c_ins[i][1])
+    hidden = dense_hidden(hidden)
+    hidden = merge_add([c_dense, hidden], mode='sum')
+    # every layer now has an output
+    outs.append(dense_out(hidden))
+                    </code></pre>
+                    <p>Eight outputs means eight binary cross entropies to manage</p>
+                    <aside class="notes">The first character will always be difficult to predict, because there is no info.</aside>                 
+                </section>
+                <section>
+                    <h2>This is easy in Keras</h2>
+                    <pre><code data-trim data-noescape class="python">
+model=Sequential([
+        Embedding(vocab_size, n_fac, input_length=cs),
+        SimpleRNN(n_hidden, 
+                  return_sequences=True,
+                  activation='relu', 
+                  recurrent_initializer='identity'),
+        TimeDistributed(Dense(vocab_size, activation='softmax')),
+    ])
+                    </code></pre>
+                    <p>Two differences</p>
+                    <ol>
+                        <li>return_sequences=True</li>
+                        <li>TimeDistributed wrapped around Dense</li>
+                    </ol>
+                    <aside class="notes">TimeDistributed is a wrapper that applies a Dense layer to each time step.</aside>
+                </section>
+                <section>
+                    <h2>Some changes to Jeremy's Code</h2>
+                    <p>Migrated from Keras 1 to 2</p>
+                    <p>Migrated from Python 2 to 3</p>
+                    <p>Using a Tensorflow backend (instead of Theano)</p>
+                    <p>Only important difference: Had to remove extra dimensions for some training</p>
+                </section>
+            </section>
+            <section>
+                <h1>Stateful RNNs</h1>
+            </section>
+            <section>
+                <p>We want to model long-term dependencies</p>
+                <p>The RNN needs to be aware of ALL of the previous sequence</p>
+                <p>This was impossible until the creation of Long-Short Term Memory</p>
+                <p>An LSTM replaces the hidden-to-hidden matrix with another neural net</p>
+                <p>LSTMs are difficult to parallelize. Training is slower</p>
+            </section>
+            <section>
+                <h2>First Model</h2>
+                    <pre><code data-trim data-noescape class="python">
+model=Sequential([
+        Embedding(vocab_size, n_fac, input_length=cs, batch_input_shape=(bs, 8)),
+        BatchNormalization(),
+        LSTM(n_hidden, return_sequences=True, stateful=True),
+        TimeDistributed(Dense(vocab_size, activation='softmax')),
+    ])
+                    </code></pre>
+                    <p>Batch Normalization was required to get this model running</p>
+                    <p>Parameters:</p>
+                    <ul>
+                        <li>84[Input] * 42[Latent Factors] = 3612</li>
+                        <li>42[Input] * 2 [Parameters] *2[Dimensions] =168</li>
+                        <li>4 * ((42[Input]+1)*256[Output] + 256**2) = 306176</li>
+                        <li>22102 = 256[Input] * [86]Output</li>
+                    </ul>              
+            </section>
+            <section>
+                <h2>Stacked RNN</h2>
+                <img src="stacked_model.png">
+            </section>
+            <section>
+            <pre><code data-trim data-noescape class="python">
+model=Sequential([
+        Embedding(vocab_size, n_fac, input_length=maxlen),
+        LSTM(512, recurrent_dropout=0.2, return_sequences=True, 
+             dropout=0.2, implementation=2, input_shape=(n_fac,)),
+        Dropout(0.2),
+        LSTM(512, dropout=0.2, recurrent_dropout=0.2, 
+             return_sequences=True),
+        Dropout(0.2),
+        TimeDistributed(Dense(vocab_size)),
+        Activation('softmax')
+    ])                    
+            </code></pre>
+            <p>This will take a long time to train but gives the best results we've seen so far</p>
+            </section>
+            <section>
+                <section><h1>Theano RNN</h1></section>
+                <section>
+                <p>Sparse Categorical Cross-entropy just converts integer to a one-hot encoding implicitly</p>
+                <p>We to make this explicit for Theano</p>
+                    <pre><code data-trim data-noescape class="python">
+model=Sequential([
+        SimpleRNN(n_hidden, return_sequences=True, input_shape=(cs, vocab_size),
+                  activation='relu', recurrent_initializer="identity"),
+        TimeDistributed(Dense(vocab_size, activation='softmax')),
+    ])
+model.compile(loss='categorical_crossentropy', optimizer=Adam())
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>Theano</h2>
+                    <p>Manipulates tensors in the GPU</p>
+                    <p>Automatic Differentiation</p>
+                    <p>Need to declare upfront for computational graph</p>
+                    <p>Used shared to claim an array for theano</p>
+                </section>
+            </section>
+
         </div>
     </div>
     <script src="reveal.js/lib/js/head.min.js"></script>
