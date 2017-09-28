@@ -28,18 +28,13 @@
                 </section>
             <section>
                 <ol>
-                    <li>Pseudolabeling Revisited</li>
-                    <li>Embeddings Revisited</li>
-                    <li>RNNs</li>
-                    <li>Theano/Tensorflow</li>
+                    <li>Use cases for RNNs</li>
+                    <li>Three Character Model</li>
+                    <li>Nth Character Model</li>
+                    <li>Sequential RNNs</li>
+                    <li></li>
                 </ol>
                 <aside class="notes">Table of Contents Here</aside>
-            </section>
-            <section>
-                <h1>Pseudolabeling Revisited</h1>
-            </section>
-            <section>
-                <h1>Embeddings Revisited</h1>
             </section>
             <section>
                 <section>
@@ -50,6 +45,7 @@
                     <ul>
                         <li>Anything that requires knowledge of long term structure</li>
                         <li>Text data</li>
+						<li>Sequential data</li>
                         <!-- More -->
                     </ul>
                 </section>
@@ -129,9 +125,8 @@ dense_out = Dense(vocab_size, activation='softmax')
 c4_out = dense_out(c3_hidden)
                     </code></pre>
                     <p>Parameters: 21845</p>
-                    <!-- TODO: Talk about sparse categorical -->
                     <!-- TODO: Show results -->
-                    <aside class="notes">256[previous latent] * 256[output] + 85[biases]</aside>
+                    <aside class="notes">256[previous latent] * 86[output]</aside>
                 </section>
             </section>
             <section>
@@ -256,16 +251,17 @@ model=Sequential([
                 </section>
             </section>
             <section>
-                <h1>Stateful RNNs</h1>
-            </section>
-            <section>
+                <section>
+                    <h1>Stateful RNNs</h1>
+                </section>
+                <section>
                 <p>We want to model long-term dependencies</p>
                 <p>The RNN needs to be aware of ALL of the previous sequence</p>
                 <p>This was impossible until the creation of Long-Short Term Memory</p>
                 <p>An LSTM replaces the hidden-to-hidden matrix with another neural net</p>
                 <p>LSTMs are difficult to parallelize. Training is slower</p>
-            </section>
-            <section>
+                </section>
+                <section>
                 <h2>First Model</h2>
                     <pre><code data-trim data-noescape class="python">
 model=Sequential([
@@ -283,12 +279,12 @@ model=Sequential([
                         <li>4 * ((42[Input]+1)*256[Output] + 256**2) = 306176</li>
                         <li>22102 = 256[Input] * [86]Output</li>
                     </ul>              
-            </section>
-            <section>
+                </section>
+                <section>
                 <h2>Stacked RNN</h2>
                 <img src="stacked_model.png">
-            </section>
-            <section>
+                </section>
+                <section>
             <pre><code data-trim data-noescape class="python">
 model=Sequential([
         Embedding(vocab_size, n_fac, input_length=maxlen),
@@ -303,6 +299,7 @@ model=Sequential([
     ])                    
             </code></pre>
             <p>This will take a long time to train but gives the best results we've seen so far</p>
+                </section>
             </section>
             <section>
                 <section><h1>Theano RNN</h1></section>
@@ -324,6 +321,7 @@ model.compile(loss='categorical_crossentropy', optimizer=Adam())
                     <p>Automatic Differentiation</p>
                     <p>Need to declare upfront for computational graph</p>
                     <p>Used shared to claim an array for theano</p>
+                    <p>Breaks CUDA when you try upgrade it the day before a presentation</p>
                 </section>
             </section>
 
